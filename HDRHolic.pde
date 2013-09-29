@@ -48,7 +48,7 @@ void setup(){
 
   cp5 = new ControlP5(this);
 
-  controlWindow = cp5.addControlWindow("controlP5window", 100, 100, 360, 600)
+  controlWindow = cp5.addControlWindow("Tunewindow", 100, 100, 360, 600)
     .hideCoordinates()
     .setBackground(color(40))
     ;
@@ -185,7 +185,7 @@ public void controlEvent(ControlEvent theEvent) {
 
   if(theEvent.isFrom("Save Image")) {
     String imgPath = selectOutput();
-    save(imgPath);
+    writeImg.save(imgPath);
   }
 
   if(theEvent.isFrom("Exit")) {
