@@ -34,9 +34,9 @@ float[] lut_n = new float[256];
 float[] lut_o = new float[256];
 
 // hdr image
-float[] hdr_img_r;
-float[] hdr_img_g;
-float[] hdr_img_b;
+int[] hdr_img_r;
+int[] hdr_img_g;
+int[] hdr_img_b;
 
 //Window Size
 int size_x = 1024;
@@ -200,15 +200,7 @@ void draw(){
   image(writeImg, 0, 0, view_width, view_height);
 }
 
-void MakeHDR(){
-  hdr_img_r = new float[img0.height*img0.width];
-  hdr_img_g = new float[img0.height*img0.width];
-  hdr_img_b = new float[img0.height*img0.width];
-
-  img0.loadPixels();
-  img1.loadPixels();
-  img2.loadPixels();
-
+void MakeGamma(){
   for (int i = 0; i < 256; i++){
     lut_u[i] = 255*pow(((float)i/255),(1/gamma_u));
   }
@@ -219,7 +211,19 @@ void MakeHDR(){
 
   for (int i = 0; i < 256; i++){
     lut_o[i] = 255*pow(((float)i/255),(1/gamma_o));
-  }
+  }  
+}
+
+void MakeHDR(){
+  MakeGamma();
+
+  hdr_img_r = new int[img0.height*img0.width];
+  hdr_img_g = new int[img0.height*img0.width];
+  hdr_img_b = new int[img0.height*img0.width];
+
+  img0.loadPixels();
+  img1.loadPixels();
+  img2.loadPixels();
 
   for(int i = 0; i < img0.width*img0.height; i++){
     color tmp_color0 = img0.pixels[i];
@@ -227,15 +231,15 @@ void MakeHDR(){
     color tmp_color2 = img2.pixels[i];
 
     hdr_img_r[i] =
-      lut_u[(int)red(tmp_color0)] + lut_n[(int)red(tmp_color1)] + lut_o[(int)red(tmp_color2)];
+      (int)((lut_u[(int)red(tmp_color0)] + lut_n[(int)red(tmp_color1)] + lut_o[(int)red(tmp_color2)])*color_gain/3);
     hdr_img_g[i] =
-      lut_u[(int)green(tmp_color0)] + lut_n[(int)green(tmp_color1)] + lut_o[(int)green(tmp_color2)];
+      (int)((lut_u[(int)green(tmp_color0)] + lut_n[(int)green(tmp_color1)] + lut_o[(int)green(tmp_color2)])*color_gain/3);
     hdr_img_b[i] =
-      lut_u[(int)blue(tmp_color0)] + lut_n[(int)blue(tmp_color1)] + lut_o[(int)blue(tmp_color2)];
+      (int)((lut_u[(int)blue(tmp_color0)] + lut_n[(int)blue(tmp_color1)] + lut_o[(int)blue(tmp_color2)])*color_gain/3);
 
-    hdr_img_r[i] = hdr_img_r[i]/3*color_gain;
-    hdr_img_g[i] = hdr_img_g[i]/3*color_gain;
-    hdr_img_b[i] = hdr_img_b[i]/3*color_gain;
+//    hdr_img_r[i] = hdr_img_r[i]/3*color_gain;
+//    hdr_img_g[i] = hdr_img_g[i]/3*color_gain;
+//    hdr_img_b[i] = hdr_img_b[i]/3*color_gain;
   }
 
   //debug-----
@@ -265,7 +269,6 @@ void ToneMapping(){
 //  println("average_speede= " + average_speed);
 
   //ToneMapping----
-  color[] tmp_img = new color[img0.height*img0.width];
   int tmp = average_speed;
   float lum_sum_w = 0;
 
