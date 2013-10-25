@@ -22,7 +22,7 @@ int scope_speed_ratio = low_scope_speed_ratio; // 1 to scope
 float average_speed_ratio = low_average_speed_ratio; // 0 to picture width
 
 final int max_lum_class = 30; // 1 to 256
-int class_th = 15; // class threshold
+int class_th = 20; // class threshold
 float a_value = 0.27;
 float gamma_u = 0.5;
 float gamma_n = 1;
@@ -112,7 +112,7 @@ void setup(){
      ;
 
   cp5.addSlider("class_th")
-     .setRange(0, 30)
+     .setRange(0, 40)
      .setPosition(40, 420)
      .setSize(200, 29)
      .moveTo(controlWindow)
@@ -144,14 +144,21 @@ void setup(){
 
   writeImg = createImage(img0.width, img0.height, RGB);
 
+// long nt = System.nanoTime();
+
   MakeHDR();
   ToneMapping();
+
+// long nt2 = System.nanoTime();
+
+//  long a = nt2 -nt;
+//  println("time=" +a );
 
   readmeText.setText("Completed.");
 
   if(img0.width > size_x || img0.height > size_y){
-    float k_width = img0.width / size_x;
-    float k_height = img0.height /size_y;
+    float k_width = (float)img0.width / (float)size_x;
+    float k_height = (float)img0.height / (float)size_y;
     float k_max;
     if(k_width > k_height){
       k_max = k_width;
@@ -256,6 +263,8 @@ void MakeHDR(){
 }
 
 void ToneMapping(){
+ long nt = millis();
+
   float lum_sum;
   int sum_numb;
 
@@ -272,19 +281,22 @@ void ToneMapping(){
   int tmp = average_speed;
   float lum_sum_w = 0;
 
-  float[] lum = new float[img0.height*img0.width];
+  int[] lum = new int[img0.height*img0.width];
   float[] lum_local = new float[img0.height*img0.width];
+//  int[] lum_local = new int[img0.height*img0.width];
   int[] lum_class = new int[img0.height*img0.width];
-  float[] u = new float[img0.height*img0.width];
-  float[] v = new float[img0.height*img0.width];
+  int[] u = new int[img0.height*img0.width];
+  int[] v = new int[img0.height*img0.width];
 
   for(int y = 0; y < img0.height; y++){
     for(int x = 0; x < img0.width; x++){
       int pos = x + y*img0.width;
-      lum[pos] = 0.3*hdr_img_r[pos] + 0.59*hdr_img_g[pos] + 0.11*hdr_img_b[pos];
-      lum_local[pos] = log((0.3*hdr_img_r[pos] + 0.59*hdr_img_g[pos] + 0.11*hdr_img_b[pos])/256+delta);
-      u[pos] = -0.17*hdr_img_r[pos] - 0.33*hdr_img_g[pos] + 0.5*hdr_img_b[pos];
-      v[pos] = 0.5*hdr_img_r[pos] -0.42*hdr_img_g[pos] - 0.08*hdr_img_b[pos];
+      lum[pos] = (307*hdr_img_r[pos] + 604*hdr_img_g[pos] + 113*hdr_img_b[pos])  >> 10;
+      lum_local[pos] = log((float)(lum[pos]) / 256 + delta);
+//      lum_local[pos] = (int)(log((float)(lum[pos]) / 256 + delta));
+
+      u[pos] = (-174*hdr_img_r[pos] - 338*hdr_img_g[pos] + 512*hdr_img_b[pos]) >> 10;
+      v[pos] = (512*hdr_img_r[pos] -430*hdr_img_g[pos] - 82*hdr_img_b[pos]) >> 10;
     }
   }
   
@@ -292,7 +304,7 @@ void ToneMapping(){
   for(int y = 0; y < img0.height; y++){
     for(int x = 0; x < img0.width; x++){
       int pos = x + y*img0.width;
-      lum_class[pos] = (int)(lum[pos]/((max_lum+1)/max_lum_class));
+      lum_class[pos] = (int)(float(lum[pos])/((max_lum+1)/max_lum_class));
     }
   }
 
@@ -320,13 +332,21 @@ void ToneMapping(){
       }
 
       float lum_w = lum[pos]/lum_sum_w*a_value;
-      float r = lum_w + 1.4*v[pos];
-      float g = lum_w -0.34*u[pos] -0.71*v[pos];
-      float b = lum_w + 1.77*u[pos];
+
+      int r = (int)(1024*lum_w + 1433*v[pos]) >> 10;
+      int g = (int)(1024*lum_w -348*u[pos] -727*v[pos]) >> 10;
+      int b = (int)(1024*lum_w + 1812*u[pos]) >> 10;
       
       writeImg.pixels[pos] = color(r,g,b);
     }
   }
   writeImg.updatePixels();
+
+  long nt2 = millis();
+
+  long a = nt2 -nt;
+  println("time=" +a );
+
+
 }
 
