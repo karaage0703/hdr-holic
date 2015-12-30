@@ -20,3 +20,17 @@ for processing v1.xx (processing 1.5.1 is recommended)
 
 # screen shot
 <img src="https://raw.githubusercontent.com/wiki/karaage0703/hdr-holic/006.png" alt="hdr-holic" width="640" height="480">
+
+
+
+# Creating iconset (only for MAC user)
+
+If you want to create iconset, execute below command.
+
+~~~~
+$ iconutil -c icns sketch.iconset
+~~~~
+
+
+# License
+This software is released under the MIT License, see LICENSE.
