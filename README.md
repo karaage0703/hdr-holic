@@ -5,6 +5,7 @@
 
 HDR(high dynamic range imaging) effect software for photo.
 
+for processing v1.xx (processing 1.5.1 is recommended)
 
 # sample
 ## source images
